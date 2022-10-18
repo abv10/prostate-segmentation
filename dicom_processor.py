@@ -5,6 +5,7 @@ import pydicom.data
 import csv
 from os.path import exists
 import dicom2nifti
+import SimpleITK as sitk
 
 metadata_file = open("segmented_images/manifest-1605042674814/metadata.csv")
 csvreader = csv.reader(metadata_file)
@@ -14,27 +15,24 @@ rows = []
 for row in csvreader:
     rows.append(row)
 loc_index = header.index("File Location")
-
-all_name = "1-1.dcm"
+print(len(rows))
+i = 1
 for row in rows:
-    original_path = row[loc_index]
-    new_path = original_path.replace(".\\", "segmented_images/manifest-1605042674814\\")  + "\\" + all_name
-    ds = pyd.dcmread(new_path)
-    print(ds.pixel_array.shape)
+    file = row[loc_index].replace(".\\", "segmented_images/manifest-1605042674814\\")
+    absolute = os.path.abspath(file)
+    print(absolute)
+    series_file_names = sitk.ImageSeriesReader.GetGDCMSeriesFileNames(absolute)
+    print(len(series_file_names))
+    series_reader = sitk.ImageSeriesReader()
+    series_reader.SetFileNames(series_file_names)
+    image3d = series_reader.Execute()
 
-
-metadata_file = open("original_images/manifest-1605042674814/metadata.csv")
-csvreader = csv.reader(metadata_file)
-header = []
-header = next(csvreader)
-rows = []
-for row in csvreader:
-    rows.append(row)
-loc_index = header.index("File Location")
-
-path = rows[0][loc_index].replace(".\\", "original_images/manifest-1605042674814\\")
-for file in os.listdir(path):
-    ds = pyd.dcmread(path +"\\" + file)
-    print(ds.pixel_array.shape)
+    save_img_file = "testlabels/" + str(i) + ".nii.gz"
+    sitk.WriteImage(image3d, save_img_file, True)
+    i += 1
+    #print(os.path.exists(absolute))
+    #print(dicom2nifti.convert_directory(absolute, os.path.abspath("test")))
 
 exit(-3)
+
+
