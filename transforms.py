@@ -78,4 +78,4 @@ def pad(id_num):
         return str(id_num)
 
 if __name__ == "__main__":
-    affine_transform("Task503_Prostate", 440)
+    affine_transform("Task602_Prostate", 415)
