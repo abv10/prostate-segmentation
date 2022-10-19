@@ -14,21 +14,21 @@ def augment_images(image_path, label_path, task, new_id, transform):
     transformed_label = transform(original_label)
 
     transformed_label.save("nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/labelsTr/PROS_" + str(new_id) + ".nii.gz")
-    transformed_image.save("nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/imagesTr/PROS_" + str(new_id) + ".nii.gz")
+    transformed_image.save("nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/imagesTr/PROS_" + str(new_id) + "_0000.nii.gz")
+    print(new_id)
 
 
-def flip_images(task):
+def flip_images(task, max_id):
     image_path = "nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/imagesTr/"
     label_path = "nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/labelsTr/"
 
     images = os.listdir(image_path)
     labels = os.listdir(label_path)
-    max_id = len(images)
-    if max_id != len(labels):
+    if len(images) != len(labels):
         print("EXCEPTION: NOT MATCHED DATASET and LABEL SIZE")
     flip = tio.RandomFlip(flip_probability=1.0, axes=('LR',))
     current_id = max_id + 1
-    for i in range(max_id):
+    for i in range(len(images)):
         or_im = image_path + images[i]
         or_lab = label_path + labels[i]
         augment_images(or_im, or_lab, task, pad(current_id), flip)
@@ -41,7 +41,7 @@ def affine_transform(task):
 
     images = os.listdir(image_path)
     labels = os.listdir(label_path)
-    max_id = len(images)
+    max_id = images[-1]
     if max_id != len(labels):
         print("EXCEPTION: NOT MATCHED DATASET and LABEL SIZE")
 
@@ -76,3 +76,6 @@ def pad(id_num):
         return "0" + str(id_num)
     else:
         return str(id_num)
+
+if __name__ == "__main__":
+    flip_images("Task502_Prostate", 341)
