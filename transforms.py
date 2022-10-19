@@ -35,18 +35,16 @@ def flip_images(task, max_id):
         current_id += 1
 
 
-def affine_transform(task):
+def affine_transform(task, max_id):
     image_path = "nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/imagesTr/"
     label_path = "nnUNET_raw_data_base/nnUNET_raw_data/" + task + "/labelsTr/"
 
     images = os.listdir(image_path)
     labels = os.listdir(label_path)
-    max_id = images[-1]
-    if max_id != len(labels):
+    if len(images) != len(labels):
         print("EXCEPTION: NOT MATCHED DATASET and LABEL SIZE")
-
     current_id = max_id + 1
-    for i in range(max_id):
+    for i in range(len(images)):
         or_im = image_path + images[i]
         or_lab = label_path + labels[i]
 
@@ -61,10 +59,12 @@ def affine_transform(task):
 
 def get_transform():
     scale1 = random.uniform(0.8, 1.2)
-    scale2 = random.uniform((0.8, 1.2))
-    degrees = random.randint(-10, 10)
+    scale2 = random.uniform(0.8, 1.2)
+    degrees = random.randint(0, 10)
+
+    print(degrees)
     return tio.RandomAffine(
-        scales=(scale1, scale2),
+        scales=(min(scale1, scale2), max(scale1, scale2)),
         degrees=degrees,
     )
 
@@ -78,4 +78,4 @@ def pad(id_num):
         return str(id_num)
 
 if __name__ == "__main__":
-    flip_images("Task502_Prostate", 341)
+    affine_transform("Task503_Prostate", 440)
